@@ -9,7 +9,7 @@
 </script>
 
 <html data-theme="corporate" lang="en">
-	<div class="drawer drawer-mobile">
+	<!-- <div class="drawer drawer-mobile">
 		<input id="main-drawer" type="checkbox" class="drawer-toggle" />
 		<div class="drawer-content flex flex-col items-center justify-center">
 			<slot />
@@ -40,5 +40,9 @@
 				</li>
 			</ul>
 		</div>
+	</div> -->
+
+	<div class="flex flex-col items-center justify-center">
+		<slot />
 	</div>
 </html>
