@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { emit } from '@tauri-apps/api/event';
 	import { copyFile } from '@tauri-apps/api/fs';
-	import { appDataDir } from '@tauri-apps/api/path';
+	import { appDataDir, basename, join } from '@tauri-apps/api/path';
+	import { invoke } from '@tauri-apps/api/tauri';
 	import { appWindow } from '@tauri-apps/api/window';
 	import { onDestroy, onMount } from 'svelte';
 
@@ -9,19 +9,24 @@
 	let status = 'idle';
 
 	onMount(async () => {
+		await invoke('setup_local_db');
+
+		const appDataDirPath = await appDataDir();
+		const localFilePath = await join(appDataDirPath, 'local_files');
+
 		unlisten = await appWindow.onFileDropEvent(async (event) => {
 			if (event.payload.type === 'hover') {
 				status = 'hover';
 			} else if (event.payload.type === 'drop') {
-				const appDataDirPath = await appDataDir();
-				const path = event.payload.paths[0];
-				const fileName = path.split('/').pop();
-
 				status = 'drop';
 
-				await emit('file_drop', event.payload.paths[0]);
-				await copyFile(path, `${appDataDirPath}/local_files/${fileName}`);
-				console.log(`${path} copied to ${appDataDirPath}/local_files/${fileName}`);
+				const payloadPath = event.payload.paths[0];
+				const fileName = await basename(payloadPath);
+				const filePath = await join(localFilePath, fileName as string);
+
+				await invoke('move_file_to_local_storage');
+
+				await copyFile(payloadPath, filePath);
 			} else {
 				status = 'idle';
 			}
@@ -34,3 +39,6 @@
 </script>
 
 {status}
+{#await appDataDir() then appDataDirPath}
+	{appDataDirPath}
+{/await}
