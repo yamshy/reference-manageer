@@ -24,8 +24,6 @@
 				const fileName = await basename(payloadPath);
 				const filePath = await join(localFilePath, fileName as string);
 
-				await invoke('move_file_to_local_storage');
-
 				await copyFile(payloadPath, filePath);
 			} else {
 				status = 'idle';

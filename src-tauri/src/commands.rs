@@ -1,5 +1,5 @@
-mod local_storage;
+mod metadata;
 mod setup;
 
-pub use local_storage::*;
+pub use metadata::*;
 pub use setup::*;

@@ -1,4 +1,4 @@
-use sea_orm::Database;
+use crate::AppState;
 use std::fs::File;
 use std::io::prelude::*;
 use tauri::Runtime;
@@ -6,7 +6,7 @@ use tauri::Runtime;
 #[tauri::command]
 pub async fn setup_local_db<R: Runtime>(
     app: tauri::AppHandle<R>,
-    window: tauri::Window<R>,
+    state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
     println!("setup_local_db");
 
@@ -25,22 +25,22 @@ pub async fn setup_local_db<R: Runtime>(
         File::create(&local_db_file).expect("failed to create local_db file");
     }
 
+    let db_url = format!(
+        "sqlite://{}",
+        local_db_file
+            .to_str()
+            .expect("failed to convert local_db_file to str")
+    );
+    state.db_connect(&db_url).await.unwrap();
+
     // set up env file for dev
     let env_file = std::env::current_dir()
         .expect("failed to get current dir")
         .join(".env");
     if !env_file.exists() {
         let mut file = File::create(&env_file).expect("failed to create .env file");
-        file.write_all(
-            format!(
-                r#"DATABASE_URL="sqlite://{}""#,
-                local_db_file
-                    .to_str()
-                    .expect("failed to convert local_db_file to str")
-            )
-            .as_bytes(),
-        )
-        .expect("failed to write to .env file");
+        file.write_all(format!("DATABASE_URL={}", db_url).as_bytes())
+            .expect("failed to write to .env file");
     }
 
     Ok(())
