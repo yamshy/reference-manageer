@@ -25,6 +25,7 @@
 				const filePath = await join(localFilePath, fileName as string);
 
 				await copyFile(payloadPath, filePath);
+				await invoke('import_metadata', { filePath });
 			} else {
 				status = 'idle';
 			}

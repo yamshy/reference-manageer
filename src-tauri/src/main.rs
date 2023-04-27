@@ -4,6 +4,7 @@
 )]
 
 mod commands;
+mod entities;
 
 use std::sync::{Arc, Mutex};
 
@@ -48,7 +49,7 @@ fn main() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![setup_local_db,])
+        .invoke_handler(tauri::generate_handler![setup_local_db, import_metadata])
         .manage(app_state)
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
